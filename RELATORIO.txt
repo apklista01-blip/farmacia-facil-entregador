@@ -1,0 +1,190 @@
+================================================================
+  FARMACIA FACIL - RELATORIO DO APP ENTREGADOR
+  Gerado em: 28/10/2026
+  Projeto Firebase: farmacia-facil-b980c
+================================================================
+
+1. VISAO GERAL
+----------------------------------------------------------------
+
+O App Entregador e o aplicativo (Flutter) voltado para os
+entregadores da plataforma Farmacia Facil. Permite que o
+entregador se cadastre, faca login, visualize pedidos prontos
+para entrega, aceite entregas, acompanhe em rota e marque
+como entregue, alem de consultar o historico de entregas.
+
+Ecossistema Farmacia Facil:
+  - App Usuario (farmacia.facio) - PRODUCAO
+  - App Vendedor (farmacia-facil-vendedor) - PRODUCAO
+  - App Admin (farmacia-facio-admin) - MVP funcional
+  - App Entregador (este projeto) - FASE 3 (MVP funcional)
+
+Projeto Firebase compartilhado: farmacia-facil-b980c
+Conta: sandroprogramatattoo@gmail.com
+
+2. STACK TECNOLOGICA
+----------------------------------------------------------------
+
+  Framework: Flutter 3.38.5 (Dart 3.10.4)
+  Alvo: Web (Chrome) e compativel com mobile
+  Estado: flutter_riverpod 3.3.2 (Notifier API)
+  Navegacao: go_router 17.5.0
+  Backend: Firebase (firebase_core 5.1.0, firebase_auth 7.0.1,
+           cloud_firestore 7.1.0)
+  Utilitarios: intl 0.20.3, shared_preferences 2.5.5,
+               url_launcher 6.3.0
+  Lints: flutter_lints 6.0.0
+
+3. ARQUITETURA E ESTRUTURA
+----------------------------------------------------------------
+
+lib/
+  main.dart                 Inicializacao Firebase + ProviderScope
+  firebase_options.dart     Config do projeto farmacia-facil-b980c
+  app/
+    theme.dart              Tema claro (verde)
+    routes.dart             GoRouter + redirecionamento por auth
+  models/
+    delivery_person_model.dart  Entregador (id,name,email,phone,isActive,createdAt)
+    order_model.dart        Pedido (status, itens, total, entrega, pharmacyName)
+  providers/
+    auth_provider.dart      DeliveryAuthNotifier (login, cadastro, logout)
+    orders_provider.dart    DeliveryOrdersNotifier (disponiveis, meus, aceitar, entregar)
+  screens/
+    auth/
+      login_screen.dart     Login (email/senha) + link "Criar conta"
+      register_screen.dart  Cadastro de entregador
+    orders/
+      available_orders_screen.dart  Pedidos disponiveis + aceitar
+      my_orders_screen.dart        Em rota / concluidas
+    history/
+      history_screen.dart   Historico de entregas concluidas
+  widgets/
+    delivery_shell.dart     Shell com BottomNavigationBar
+
+Colecoes Firestore consumidas:
+  - delivery_persons  (cadastro/login/verificacao)
+  - orders            (leitura e atualizacao de status)
+
+4. FUNCIONALIDADES IMPLEMENTADAS
+----------------------------------------------------------------
+
+AUTENTICACAO:
+  OK Cadastro de entregador (nome, email, senha, telefone)
+  OK Login com Firebase Auth (email/senha)
+  OK Verificacao de entregador (colecao delivery_persons)
+  OK Verificacao de conta ativa (isActive)
+  OK Logout
+  OK Redirecionamento automatico (nao-logado -> /login)
+
+PEDIDOS DISPONIVEIS:
+  OK Listagem de pedidos com status "ready" sem entregador
+  OK Exibicao de farmacia, endereco, total, itens, tipo (entrega/retirada)
+  OK Aceitar entrega (define deliveryPersonId + status "delivering")
+  OK Feedback via SnackBar (sucesso/erro)
+  OK Pull-to-refresh
+
+MEUS PEDIDOS:
+  OK Separacao em "Em rota" e "Concluidas"
+  OK Exibicao de cliente, endereco, farmacia, total
+  OK Botao "Marcar como entregue" (status -> delivered)
+  OK Feedback via SnackBar
+
+HISTORICO:
+  OK Listagem de entregas concluidas (status delivered)
+  OK Exibicao de cliente, endereco, data, total
+
+NAVEGACAO:
+  OK BottomNavigationBar (Disponiveis, Meus, Historico)
+  OK ShellRoute (layout persistente)
+  OK Rotas: /login, /register, /, /meus, /historico
+
+5. FLUXO DE STATUS DO PEDIDO
+----------------------------------------------------------------
+
+  ready (pronto na farmacia)
+    -> entregador aceita
+  delivering (em rota)
+    -> entregador marca entregue
+  delivered (entregue)
+
+Campos atualizados no Firestore:
+  - deliveryPersonId (uid do entregador)
+  - status (delivering / delivered)
+  - updatedAt (timestamp ISO)
+6. QUALIDADE E ESTADO DO CODIGO
+----------------------------------------------------------------
+
+  OK flutter analyze: sem issues
+  OK flutter build web: build bem-sucedido
+  OK Estrutura de pastas organizada
+  OK Riverpod Notifier (padrao do ecossistema)
+  OK go_router com ShellRoute
+  OK Tema centralizado (AppTheme)
+  OK Modelos com toMap/fromMap
+
+  ATENCAO Providers carregam dados sob demanda (load manual);
+          sem listeners em tempo real (snapshots).
+  ATENCAO Sem testes automatizados (apenas placeholder).
+  ATENCAO Sem paginacao (colecoes carregadas por completo).
+  ATENCAO Sem busca/filtro de pedidos.
+  ATENCAO Sem detalhe de pedido (tela dedicada).
+  ATENCAO Strings hardcoded em pt-BR (sem i18n).
+
+7. INTEGRACAO COM O ECOSSISTEMA
+----------------------------------------------------------------
+
+  - Compartilha o mesmo projeto Firebase (farmacia-facil-b980c).
+  - Le pedidos criados pelo app Usuario e atualizados pelo Vendedor.
+  - Cadastro de entregador cria documento em delivery_persons.
+  - Status atualizados sao refletidos para Usuario/Vendedor/Admin.
+
+8. PENDENCIAS / ROADMAP
+----------------------------------------------------------------
+
+PRIORIDADE ALTA:
+  [ ] Atualizacao em tempo real (snapshots)
+  [ ] Tela de detalhe do pedido (itens, endereco, telefone cliente)
+  [ ] Notificacoes de novos pedidos disponiveis
+  [ ] Tratamento de erros com feedback visual
+
+PRIORIDADE MEDIA:
+  [ ] Paginacao de pedidos
+  [ ] Busca/filtro por status/data
+  [ ] Exibir rota/mapa (integracao com mapas)
+  [ ] Perfil do entregador (editar dados)
+  [ ] Confirmacao antes de marcar entregue
+
+PRIORIDADE BAIXA:
+  [ ] Testes automatizados
+  [ ] Internacionalizacao
+  [ ] Tema escuro
+  [ ] Analytics/crash reporting
+  [ ] Publicacao no GitHub Pages
+
+9. METRICAS DO PROJETO
+----------------------------------------------------------------
+
+  Arquivos Dart: ~15
+  Linhas de codigo (aprox.): ~1.200
+  Dependencias diretas: 9
+  Colecoes Firestore: 2 (delivery_persons, orders)
+  Rotas: 5 (/login, /register, /, /meus, /historico)
+  Status do build: OK (flutter build web)
+
+10. CONCLUSAO
+----------------------------------------------------------------
+
+O App Entregador esta em estagio MVP funcional: cadastro e
+login de entregadores, listagem de pedidos disponiveis, aceite
+de entrega, acompanhamento em rota, marcacao de entrega e
+historico. A integracao com o Firebase compartilhado esta
+operacional e consistente com o ecossistema.
+
+Para evolucao, recomenda-se priorizar tempo real (snapshots),
+detalhe de pedido, notificacoes e feedback visual.
+
+================================================================
+  FIM DO RELATORIO
+================================================================
+
